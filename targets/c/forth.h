@@ -36,7 +36,9 @@ struct word
 
 extern struct word SP_word, RP_word;
 
-#define POP(TYPE)	((TYPE)(*(*((cell **)SP_word.param))++))
-#define PUSH(X)		(*--(*((cell **)SP_word.param)) = (cell)(X))
-#define RPOP(TYPE)	((TYPE)(*(*((cell **)RP_word.param))++))
-#define RPUSH(X)	(*--(*((cell **)RP_word.param)) = (cell)(X))
+#define	S		(*((cell **)SP_word.param))
+#define POP(TYPE, X)	(X) = (TYPE)*(S); S++
+#define PUSH(X)		--S; *S = (cell)(X)
+#define	R		(*((cell **)RP_word.param))
+#define RPOP(TYPE, X)	(X) = (TYPE)*R; R++
+#define RPUSH(X)	--R; *R = (cell)(X)

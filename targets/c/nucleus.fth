@@ -27,7 +27,7 @@ code cold \ int main (void)
 end-code
 
 code exit ( R: ret -- )
-    IP = RPOP (xt_t *);
+    RPOP (xt_t *, IP);
 end-code
 
 code dodoes ( -- addr ) ( R: -- ret )
@@ -42,7 +42,8 @@ end-code
 
 code 0branch ( x -- )
     xt_t *addr = *(xt_t **)IP;
-    cell x = POP (cell);
+    cell x;
+    POP (cell, x);
     if (!x)
       IP = addr;
     else
@@ -60,21 +61,24 @@ code (literal) ( -- n )
 end-code
 
 code ! ( x addr -- )
-    cell *addr = POP (cell *);
-    cell x = POP (cell);
+    cell *addr, x;
+    POP (cell *, addr);
+    POP (cell, x);
     *addr = x;
 end-code
 
 code @ ( addr -- x )
-    cell *addr = POP (cell *);
+    cell *addr;
+    POP (cell *, addr);
     PUSH (*addr);
 end-code
 
 \ : +   begin ?dup while 2dup xor -rot and 2* repeat ;
 
 code + ( x y -- x+y )
-    cell y = POP (cell);
-    cell x = POP (cell);
+    cell x, y;
+    POP (cell, x);
+    POP (cell, y);
     PUSH (x + y);
 end-code
 
@@ -82,7 +86,8 @@ end-code
 \ : >r   r@ rp@ -4 + rp! rp@ ! rp@ 4 + ! ;
 
 code >r  ( x -- ) ( R: -- x )
-    cell x = POP (cell);
+    cell x;
+    POP (cell, x);
     RPUSH (x);
 end-code
 
@@ -90,29 +95,35 @@ end-code
 \ : r>   rp@ 4 + @ r@ rp@ 4 + rp! rp@ ! ;
 
 code r> ( -- x ) ( R: x -- )
-    cell x = RPOP (cell);
+    cell x;
+    RPOP (cell, x);
     PUSH (x);
 end-code
 
 code nand ( x y -- ~(x&y) )
-    cell y = POP (cell);
-    cell x = POP (cell);
+    cell x, y;
+    POP (cell, x);
+    POP (cell, y);
     PUSH (~(x & y));
 end-code
 
 code c! ( c addr -- )
-    char_t *addr = POP (char_t *);
-    cell c = POP (cell);
+    char_t *addr;
+    cell c;
+    POP (char_t *, addr);
+    POP (cell, c);
     *addr = c;
 end-code
 
 code c@ ( addr -- c )
-    uchar_t *addr = POP (uchar_t *);
+    uchar_t *addr;
+    POP (uchar_t *, addr);
     PUSH (*addr);
 end-code
 
 code emit ( c -- )
-    cell c = POP (cell);
+    cell c;
+    POP (cell, c);
     putchar (c);
 end-code
 
@@ -121,16 +132,21 @@ code bye ( ... -- <no return> )
 end-code
 
 code close-file ( fileid -- ior )
-    FILE *fileid = POP (FILE *);
+    FILE *fileid;
+    POP (FILE *, fileid);
     PUSH (fclose (fileid) == 0 ? 0 : errno);
 end-code
 
 code open-file ( addr u mode -- fileid ior )
-    char *mode = POP (char *);
-    int i, u = POP (cell);
-    char_t *addr = POP (char_t *);
-    char *name = malloc (u + 1);
+    char *mode, *name;
+    int i, u;
+    char_t *addr;
     FILE *fileid;
+
+    POP (char *, mode);
+    POP (cell, u);
+    POP (char_t *, addr);
+    name = malloc (u + 1);
 
     for (i = 0; i < u; i++)
       name[i] = *addr++;
@@ -143,11 +159,15 @@ end-code
 
 code read-file ( addr u1 fileid -- u2 ior )
     static char buffer[1024];
-    FILE *fileid = POP (FILE *);
-    cell u1 = POP (cell);
-    char_t *addr = POP (char_t *);
+    FILE *fileid;
+    cell u1;
+    char_t *addr;
     size_t u2;
     int i;
+
+    POP (FILE *, fileid);
+    POP (cell, u1);
+    POP (char_t *, addr);
 
     if (fileid == 0)
       fileid = stdin;
